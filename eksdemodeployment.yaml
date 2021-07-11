@@ -1,0 +1,56 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: eksdemodeployment
+spec:
+  selector:
+    matchLabels:
+      app: eksdemo
+  replicas: 2
+  template:
+    metadata:
+      name: eksdempopod
+      labels:
+        app: eksdemo
+    spec:
+      containers:
+      - name: eksdemocont
+        image: ankita006/java-app:5
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 100m
+            memory: 1Gi
+          limits:
+            cpu: 200m
+            memory: 2Gi
+        readinessProbe:
+          httpGet:
+            path: /java-web-app
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 10
+          periodSeconds: 20
+        livenessProbe:
+          httpGet:
+            path: /java-web-app
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 10
+          periodSeconds: 20
+
+
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: ekslbsvc
+spec:
+  selector:
+    app: eksdemo
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
